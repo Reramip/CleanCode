@@ -208,4 +208,118 @@ public class ReporterConfig {
 
 一个团队内部应当采用相同的代码规范。
 
+## 对象和数据结构
 
+### 数据抽象
+
+变量设置为`private`表明我们不希望其他人依赖这些变量，但是为什么许多程序员要为其自动添加getter/setter，使其如同`public`一般？
+
+```java
+// 具象的点
+public class Point {
+    double x;
+    double y;
+}
+```
+
+```java
+// 抽象的点
+public interface Point {
+    double getX();
+    double getY();
+    void setCartesian(double x, double y);
+
+    double getR();
+    double getTheta();
+    void setPolar(double r, double theta);
+}
+```
+
+抽象的点不但呈现了其数据结构，还表明了一种使用策略：可以单个读取坐标，但必须原子性地修改所有坐标。不可乱加getter/setter。
+
+抽象数据意味着隐藏数据细节，而不是简单地在形式上使用了接口、抽象类。
+
+```java
+// 具象机动车
+public interface Vehicle {
+    double getFuelTankCapacityInGallons();
+    double getGallonsOfGasoline();
+}
+```
+
+```java
+// 抽象机动车
+public interface Vehicle {
+    double getPercentFuelRemaining();
+}
+```
+
+显然，并不是使用了接口就是抽象。前者暴露了燃油存放在油箱中，油箱的单位是加仑。但我们无从得知后者的数据结构。
+
+### 数据与对象、过程式与面向对象编程
+
+```java
+// 过程式形状
+public class Square {
+    public Point topLeft;
+    public double side;
+}
+
+public class Circle {
+    public Point center;
+    public double radius;
+}
+
+public class Geometry {
+    public final double PI = 3.1416;
+
+    public double area(Object shape) throws NoSuchShapeException {
+        if (shape instanceof Square) {
+            Square s = (Square)shape;
+            return s.side*s.side;
+        } else if (shape instanceof Circle) {
+            Circle c = (Circle)shape;
+            return PI*c.radius*c.radius;
+        }
+        throw new NoSuchShapeException();
+    }
+}
+```
+
+```java
+// 多态式形状
+abstract class Shape {
+    double area();
+}
+
+public class Square extends Shape {
+    private Point topLeft;
+    private double side;
+
+    @Override
+    public double area() {
+        return side*side;
+    }
+}
+
+public class Circle extends Shape {
+    private Point center;
+    private double radius;
+    private final double PI = 3.1416;
+
+    @Override
+    public double area(){
+        return PI*radius*radius;
+    }
+}
+```
+
+如果要添加三角形类，在过程式代码中不单要添加新类，还需要更改Geometry中的函数来处理它，而在面向对象式代码中只需要专心于这个新的类即可。 \
+但是，如果需要添加求周长的方法`primeter()`，过程式代码中只要专注于添加方法，在面向对象式代码中，由于Shape都能求周长，需要修改所有的类。
+
+也就是说，过程式代码便于在不改动已有数据结构的前提下添加新函数；面向对象式代码便于在不改动已有方法的情况下添加新类。
+反之，过程式代码难以修改数据结构；而面向对象式代码难以添加新的方法。
+
+### 迪米特法则(Law of Demeter)/最少知识原则(Least Knowledge Principle)
+
+模块不应该知晓它所操作对象的内部情况。对象隐藏了数据，暴露了操作，它的存取方法不应暴露它的内部结构。
