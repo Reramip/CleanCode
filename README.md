@@ -323,3 +323,60 @@ public class Circle extends Shape {
 ### 迪米特法则(Law of Demeter)/最少知识原则(Least Knowledge Principle)
 
 模块不应该知晓它所操作对象的内部情况。对象隐藏了数据，暴露了操作，它的存取方法不应暴露它的内部结构。
+
+一个类C的方法f只能调用以下对象的方法：
+
+- C
+- 由f创建的对象
+- 作为参数传递给f的对象
+- 由C的实体变量所持有的对象
+
+方法**不应**调用由任何函数返回的对象的方法。即“不与陌生人说话”。
+
+避免火车式代码：
+
+```java
+final String outputDir = ctxt.getOptions().getScratchDir().getAbsolutePath();
+```
+
+最好将其划分为：
+
+```java
+Options opts = ctxt.getOptions();
+File scratchDir = opts.getScratchDir();
+final String outputdir = scratchDir.getAbsolutePath();
+```
+
+### 数据传输对象(Data Transfer Objects, DTO)
+
+DTO是指一种只有公共变量，没有函数的类。用于与数据库通信，或解析套接字传递的消息等场景中。它们可以将原始数据转换为数据库数据。
+
+拥有由赋值器、取值器操作的私有变量的"bean"豆式结构举例：
+
+```java
+public class Address {
+    private String street;
+    private String city;
+    private String zip;
+
+    public Address(String street, String city, String zip) {
+        this.street=street;
+        this.city=city;
+        this.zip=zip;
+    }
+
+    public String getStreet(){
+        return street;
+    }
+
+    public String getCity(){
+        return city;
+    }
+
+    public String getZip(){
+        return zip;
+    }
+}
+```
+
+
