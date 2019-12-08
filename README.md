@@ -7,17 +7,23 @@
 方法名应当是动词或动词短语，如save, deletePage。 \
 属性访问器、修改器、断言根据其值依JavaBean标准命名为get, set, is。 \
 
-    string name = employee.getName();
+    ```java
+    String name = employee.getName();
     customer.setName("Tom");
     if (paycheck.isPosted())...
+    ```
 
 重载构造函数，使用描述参数的静态工厂方法更优。
 
+    ```java
     Complex fulcrumPoint = Complex.FromRealNumber(23.0);
+    ```
 
 通常好于
 
+    ```java
     Complex fulcrumPoint = new Complex(23.0);
+    ```
 
 ### 每个概念确定一个词
 
@@ -33,6 +39,7 @@ MAC地址、端口地址、Web地址相区别，使用MAC, PostalAddress, URI这
 
 每个函数不应过长，数行为佳，例如：
 
+    ```java
     public static String renderPageWithSetupAndTeardowns(
             PageData pageData, boolean isSuite) throws Exception {
         if (isTestPage(pageData)){
@@ -40,6 +47,7 @@ MAC地址、端口地址、Web地址相区别，使用MAC, PostalAddress, URI这
         }
         return pageData.getHtml();
     }
+    ```
 
 if, else, while语句中的代码块尽量只有一行，调用一个拥有较具说明性的函数名称的函数，增加文档上的价值，易于阅读与理解。
 
@@ -62,8 +70,10 @@ if, else, while语句中的代码块尽量只有一行，调用一个拥有较�
 
 越少越好。如果函数看起来需要很多(3个或3个以上)参数，可能某些参数需要封装成类了。如：
 
+    ```java
     Circle makeCircle(double x, double y, double radius);
     Circle makeCircle(Point center, double radius);
+    ```
 
 函数的输出最好通过返回值体现，而不是在参数中输出。习惯上，信息通过函数输入参数，通过返回值从函数中输出。 \
 不要向函数传入boolean值标识参数，这等于大声宣布本函数不仅做一件事。 \
@@ -74,6 +84,7 @@ if, else, while语句中的代码块尽量只有一行，调用一个拥有较�
 
 反例：
 
+    ```java
     public class UserValidator {
         private Cryptographer cryptographer;
 
@@ -90,6 +101,7 @@ if, else, while语句中的代码块尽量只有一行，调用一个拥有较�
             return false;
         }
     }
+    ```
 
 副作用在于调用了`Session.initialize()`。函数名称并未体现初始化会话的功能，可能导致调用者顾名思义而误操作。这违反了函数“只做一件事”的规则。
 
@@ -97,9 +109,11 @@ if, else, while语句中的代码块尽量只有一行，调用一个拥有较�
 
 避免设计使用`if (set("username", "unclebob"))...`这种将判断与指令杂糅的函数，应将它们分开：
 
+    ```java
     if (attributeExists("username")) {
         setAttribute("username", "unclebob");
     }
+    ```
 
 这样的代码可读性更高。
 
@@ -108,6 +122,7 @@ if, else, while语句中的代码块尽量只有一行，调用一个拥有较�
 与TIJ中所讲的类似，使用异常可以将函数中的错误处理单独拎出来，减小使用if语句进行错误判断带来的层层嵌套。 \
 在CleanCode中，作者鼓励将try/catch代码块抽离出去另外形成函数使得代码结构规整美观。
 
+    ```java
     public void delete(Page page) {
         try {
             deletePageAndAllReferences(page);
@@ -125,6 +140,7 @@ if, else, while语句中的代码块尽量只有一行，调用一个拥有较�
     private void logError(Exception e) {
         logger.log(e.getMessage());
     }
+    ```
 
 错误处理本来就是一件事，函数应该专注于一件事，所以`delete`函数只与错误处理相关。 \
 而`deletePageAndAllReferences`函数只与删除页面有关。 \
