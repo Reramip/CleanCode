@@ -453,7 +453,7 @@ public class Employee {
 kata（かた、形），空手道、柔道用语，一招一式皆称为“形”。也就是招式、套路。 \
 观察保龄球计分器的开发过程，可以看到，在TDD中，用例先行，紧接着编写能使单元测试通过的代码，然后写下一个测试用例，再写项目代码……在编写单元测试、编写项目代码的同时，将其中杂糅的、重复的代码抽出去，进行重构，让测试更加自动化，在不影响输出的情况下改善代码。
 
-IDEA中自带jUnit，在Project Structure中将新建文件夹改为"Test"类型即可在其下创建测试文件。
+IDEA中自带JUnit，在Project Structure中将新建文件夹改为"Test"类型即可在其下创建测试文件。
 
 ### TDD三定律
 
@@ -465,15 +465,21 @@ IDEA中自带jUnit，在Project Structure中将新建文件夹改为"Test"类型
 
 ### 构造-操作-检验模式
 
-- 第一个环节：构造测试数据
-- 第二个环节：操作测试数据
-- 第三个环节：检验操作是否得到期望的结果
+结合测试三段论Given-When-Then，写出用户故事。
+
+Given：上下文，指定测试预设\
+When：进行一系列操作\
+Then：得到一系列可观测结果，即待检测的断言。
+
+- 第一个环节：**构造**测试数据 -> Given
+- 第二个环节：**操作**测试数据 -> When
+- 第三个环节：**检验**操作是否得到期望的结果 -> Then
 
 在对测试代码进行重构的过程中，逐步构建出简洁的测试API。尽量保证测试代码的整洁，测试环境不需要像生产环境一样考虑内存或CPU效率的问题。
 
 ```java
 // 重构前
-public void testGetPageHieratchyAsXml() throws Exception {
+void testGetPageHieratchyAsXml() {
     crawler.addPage(root, PathParser.parse("PageOne"));
     crawler.addPage(root, PathParser.parse("PageOne.ChildOne"));
     crawler.addPage(root, PathParser.parse("PageTwo"));
@@ -494,20 +500,40 @@ public void testGetPageHieratchyAsXml() throws Exception {
 ```
 
 ```java
-// 重构后
-public void testGetPageHieratchyAsXml() throws Exception {
+// 重构后(遵循每个测试一个断言原则)
+void testGetPageHieratchyAsXml() {
     // 构造
-    makePages("PageOne", "PageOne.ChildOne", "PageTwo");
+    givenPages("PageOne", "PageOne.ChildOne", "PageTwo");
 
     // 操作
-    submitRequest("root", "type:pages");
+    whenRequestIsIssued("root", "type:pages");
 
-    // 检验
-    assertResponseIsXML();
-    assertResponseContains(
+    // 检验 
+    thenResponseShouldBeXML();
+}
+
+void testGetPageHierarchyHasRightTags() {
+    // 构造
+    givenPages("PageOne", "PageOne.ChildOne", "PageTwo");
+
+    // 操作
+    whenRequestIsIssued("root", "type:pages");
+
+    // 检验 
+    thenResponseShouldContain (
         "<name>PageOne</name>", "<name>PageTwo</name>", "<name>ChildOne</name>"
     );
 }
 ```
+
+### F.I.R.S.T
+
+整洁的测试应遵循FIRST原则：
+
+- 快速（Fast）：测试应该能够快速运行，以便频繁地运行。
+- 独立（Independent）：测试之间相互独立，每个测试可以单独运行。
+- 可重复（Repeatable）：测试可在任何环境重复通过，无论是生产环境、质检环境还是个人计算机。
+- 自足验证（Self-Validating）：测试应有布尔输出，不应由开发者通过手工对比日志判断测试是否通过。
+- 及时（Timely）：测试应该及时编写，单元测试应该恰好在使其通过的生产代码之前编写。这有助于编写易于测试的生产代码。
 
 
