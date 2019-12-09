@@ -379,3 +379,88 @@ public class Address {
 }
 ```
 
+## 错误处理
+
+### 封装第三方类
+
+```java
+LocalPort port = new LocalPort(12);
+try {
+    port.open();
+} catch (PortDeviceFailure e){
+    reportError(e);
+    logger.log(e.getMessage(), e);
+} finally {
+    // ...
+    ;
+}
+```
+
+```java
+public class LocalPort {
+    private ACMEPort innerPort;
+
+    public LocalPort(int portNumber) {
+        innerPort = new ACMEPort(portNumber);
+    }
+
+    public void open() {
+        try {
+            innerPort.open();
+        } catch (DeviceResponseException e) {
+            throw new PortDeviceFailure(e);
+        } catch (ATM1212UnlockedException e) {
+            throw new PortDeviceFailure(e);
+        } catch (GMXError e) {
+            throw new PortDeviceFailure(e);
+        }
+    }
+    // ...
+}
+```
+
+其中，LocalPort是对第三方类ACMEPort进行的封装。它将自己的设备错误处理与第三方API分离开，降低了对第三方API的依赖性，以备不时之需，切换其他代码库。\
+其他时候，为了隐藏边界，也要进行封装。
+
+### 不要返回/传递`null`
+
+不如使用异常或特例对象。 \
+特例对象：在特殊条件下返回的继承自正常对象的对象。
+
+仿照TIJ中给出的例子，我们还可以定义空对象：
+
+```java
+public class Employee {
+    private String name;
+    private String office;
+
+    public static final Employee NULL = new Employee("Null Name", "Null Office");
+
+    Employee(String name, String office) {
+        this.name = name;
+        this.office = office;
+    }
+}
+```
+
+## 测试
+
+### 测试驱动开发(TDD)
+
+在本书作者Robert C. Martin(Uncle Bob)的博客中，有一个BowlingGame Kata。可以看作学习TDD的一个样板。
+<http://butunclebob.com/ArticleS.UncleBob.TheBowlingGameKata>
+
+kata（かた、形），空手道、柔道用语，一招一式皆称为“形”。也就是招式、套路。 \
+观察保龄球计分器的开发过程，可以看到，在TDD中，用例先行，紧接着编写能使单元测试通过的代码，然后写下一个测试用例，再写项目代码……在编写单元测试、编写项目代码的同时，将其中杂糅的、重复的代码抽出去，进行重构，让测试更加自动化，在不影响输出的情况下改善代码。
+
+IDEA中自带jUnit，在Project Structure中将新建文件夹改为"Test"类型即可在其下创建测试文件。
+
+### TDD三定律
+
+- 在编写不能通过的单元测试前，不可编写生产代码。
+- 只可编写刚好无法通过的单元测试，不能编译也算不通过。
+- 只可编写刚好足以通过当前失败测试的生产代码。
+
+如果严格地按照TDD进行开发，测试代码量将与工作代码量相当。那么，一旦写出了混乱的测试代码，随着代码版本更新，测试将会变得愈发无序，难以维护。因此，要像对待工作代码一样对待测试代码，保持代码整洁。
+
+
