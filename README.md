@@ -5,7 +5,7 @@
 ### 方法名
 
 方法名应当是动词或动词短语，如save, deletePage。 \
-属性访问器、修改器、断言根据其值依JavaBean标准命名为get, set, is。 \
+属性访问器、修改器、断言根据其值依JavaBean标准命名为get, set, is。
 
 ```java
     string name = employee.getName();
@@ -520,7 +520,7 @@ void testGetPageHierarchyHasRightTags() {
     whenRequestIsIssued("root", "type:pages");
 
     // 检验 
-    thenResponseShouldContain (
+    thenResponseShouldContain(
         "<name>PageOne</name>", "<name>PageTwo</name>", "<name>ChildOne</name>"
     );
 }
