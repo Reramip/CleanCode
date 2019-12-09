@@ -463,4 +463,51 @@ IDEA中自带jUnit，在Project Structure中将新建文件夹改为"Test"类型
 
 如果严格地按照TDD进行开发，测试代码量将与工作代码量相当。那么，一旦写出了混乱的测试代码，随着代码版本更新，测试将会变得愈发无序，难以维护。因此，要像对待工作代码一样对待测试代码，保持代码整洁。
 
+### 构造-操作-检验模式
+
+- 第一个环节：构造测试数据
+- 第二个环节：操作测试数据
+- 第三个环节：检验操作是否得到期望的结果
+
+在对测试代码进行重构的过程中，逐步构建出简洁的测试API。尽量保证测试代码的整洁，测试环境不需要像生产环境一样考虑内存或CPU效率的问题。
+
+```java
+// 重构前
+public void testGetPageHieratchyAsXml() throws Exception {
+    crawler.addPage(root, PathParser.parse("PageOne"));
+    crawler.addPage(root, PathParser.parse("PageOne.ChildOne"));
+    crawler.addPage(root, PathParser.parse("PageTwo"));
+
+    request.setResource("root");
+    request.addInput("type", "pages");
+    Responder responder = new SerializedPageResponder();
+    SimpleResponse response = (SimpleResponse)responder.makeResponse(
+        new FitNesseContext(root), request
+    );
+    String xml = response.getContent();
+
+    assertEquals("text/xml", response.getContentType());
+    assertSubString("<name>PageOne</name>", xml);
+    assertSubString("<name>PageTwo</name>", xml);
+    assertSubString("<name>ChildOne</name>", xml);
+}
+```
+
+```java
+// 重构后
+public void testGetPageHieratchyAsXml() throws Exception {
+    // 构造
+    makePages("PageOne", "PageOne.ChildOne", "PageTwo");
+
+    // 操作
+    submitRequest("root", "type:pages");
+
+    // 检验
+    assertResponseIsXML();
+    assertResponseContains(
+        "<name>PageOne</name>", "<name>PageTwo</name>", "<name>ChildOne</name>"
+    );
+}
+```
+
 
