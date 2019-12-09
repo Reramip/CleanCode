@@ -536,4 +536,67 @@ void testGetPageHierarchyHasRightTags() {
 - 自足验证（Self-Validating）：测试应有布尔输出，不应由开发者通过手工对比日志判断测试是否通过。
 - 及时（Timely）：测试应该及时编写，单元测试应该恰好在使其通过的生产代码之前编写。这有助于编写易于测试的生产代码。
 
+## 类
+
+### 单一职责原则(Single Responsibility Principle, SRP)
+
+类或模块应有且只有一条加以修改的理由。类只应有一个职责——只有一条修改的理由。
+
+```java
+public class SuperDashBoard extends JFrame implements MetaDataUser {
+    public Component getLastFocusedComponent(){}
+    public void setLastFocused(Component lastFocused){}
+    public int getMaorVersionNumber(){}
+    public int getMinorVersionNumber(){}
+    public int getBuildNumber(){}
+}
+```
+
+这个类既负责了管理Swing组件，又要跟踪版本信息，可以把负责版本信息的方法置于Version类中：
+
+```java
+public class Version {
+    public int getMaorVersionNumber(){}
+    public int getMinorVersionNumber(){}
+    public int getBuildNumber(){}
+}
+```
+
+### 内聚
+
+类应该只有少量的实体变量。类中每个方法都应该操作一个或多个实体变量。类中的方法与变量相互依程度越高，这个类的内聚性就越强。
+
+### 开闭原则(Open Closed Principle, OCP)
+
+类应当对扩展开放，对修改封闭。添加或修改特性时不应触及其他部分。
+
+```java
+// 添加update功能必须修改这个类，有可能触及其他代码
+public class Sql {
+    Sql(String table, Column[] columns){}
+    public String create(){}
+    public String insert(Object[] fields){}
+}
+```
+
+```java
+// 通过扩展系统而非修改来增加新的特性
+abstract class Sql {
+    Sql(String table, Column[] columns){}
+    abstract String generate();
+}
+
+public class CreateSql extends Sql {
+    public CreateSql(String table, Column[] columns) {}
+    @Override
+    public String generate(){}
+}
+
+public class InsertSql extends Sql {
+    public InsertSql(String table, Column[] columns) {}
+    @Override
+    public String generate(){}
+}
+```
+
 
